@@ -1,9 +1,3 @@
-# PDF Parser API
-
-This is a backend service that converts **DOCX** files into **SQL** or **CSV** based on user preference. It provides a REST API for document uploads and conversion.
-
----
-
 ## **Installation & Setup**
 ### **1. Clone the Repository**
 ```sh
