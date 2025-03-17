@@ -1,0 +1,28 @@
+# Binaries & Compiled Files
+/bin/
+/build/
+/dist/
+*.exe
+*.out
+*.test
+
+# Dependency Files
+vendor/
+go.sum
+go.mod
+
+# Temporary & System Files
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.iml
+
+# Environment & Secrets
+.env
+config/config.yaml
