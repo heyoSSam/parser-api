@@ -65,6 +65,7 @@ var titleRegex = regexp.MustCompile(`(?i)\b(РАЗДЕЛ|ГЛАВА|СТАТЬЯ
 func SplitSentences(text string) []string {
 	var sentences []string
 	var buffer strings.Builder
+	var lastTitle string
 
 	words := strings.Fields(text)
 	wordCount := len(words)
@@ -78,6 +79,12 @@ func SplitSentences(text string) []string {
 
 		buffer.WriteString(word)
 
+		if titleRegex.MatchString(buffer.String()) {
+			lastTitle = buffer.String()
+			buffer.Reset()
+			continue
+		}
+
 		if strings.HasSuffix(word, ".") || strings.HasSuffix(word, "!") {
 
 			if i > 0 && unicode.IsDigit(rune(words[i-1][0])) {
@@ -88,25 +95,24 @@ func SplitSentences(text string) []string {
 				continue
 			}
 
-			if titleRegex.MatchString(buffer.String()) {
-				continue
+			if lastTitle != "" {
+				sentences = append(sentences, lastTitle+" "+strings.TrimSpace(buffer.String()))
+				lastTitle = ""
+			} else {
+				sentences = append(sentences, strings.TrimSpace(buffer.String()))
 			}
 
-			sentences = append(sentences, strings.TrimSpace(buffer.String()))
 			buffer.Reset()
 			continue
-		}
-
-		if titleRegex.MatchString(buffer.String()) {
-			if buffer.Len() > 0 {
-				sentences = append(sentences, strings.TrimSpace(buffer.String()))
-				buffer.Reset()
-			}
 		}
 	}
 
 	if buffer.Len() > 0 {
-		sentences = append(sentences, strings.TrimSpace(buffer.String()))
+		if lastTitle != "" {
+			sentences = append(sentences, lastTitle+" "+strings.TrimSpace(buffer.String()))
+		} else {
+			sentences = append(sentences, strings.TrimSpace(buffer.String()))
+		}
 	}
 
 	return sentences

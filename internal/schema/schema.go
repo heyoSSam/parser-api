@@ -10,7 +10,7 @@ import (
 )
 
 func Inserts() {
-	var text, err = reader.ReadPDF("../1.pdf")
+	var text, err = reader.ReadPDF("..\\1.pdf")
 	if err != nil {
 		panic(err)
 	}
