@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"parser-api/config"
 	"parser-api/internal/handler"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -25,6 +26,8 @@ func main() {
     })
 
 	r.POST("/postSQL", handler.PostSQLHandler)
+
+	r.POST("/postCSV", handler.PostCSVHandler)
 
 	log.Printf("Server running on port " + cfg.Server.Port)
 	r.Run(":" + cfg.Server.Port)
