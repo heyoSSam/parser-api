@@ -21,12 +21,8 @@ Use the following template for configuration:
 server:
   port: 8080
 
-database:
-  host: "localhost"
-  port: 5432
-  user: "your_db_user"
-  password: "your_db_password"
-  dbname: "parser_db"
+front:
+  URL: "YOUR_URL"
 ```
 
 ### **4. Run the Server**
