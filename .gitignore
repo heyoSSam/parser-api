@@ -25,4 +25,4 @@ Thumbs.db
 
 # Environment & Secrets
 .env
-config/config.yaml
+config.yaml

@@ -9,7 +9,13 @@ type Config struct {
 	Server struct {
 		Port string `yaml:"port"`
 	} `yaml:"server"`
+	
+	Front struct {
+		URL string `yaml:"URL"`
+	}
 }
+
+
 
 func LoadConfig(path string) (*Config, error) {
 	file, err := os.ReadFile(path)
