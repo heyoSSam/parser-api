@@ -1,21 +1,22 @@
 package main
 
 import (
-	"parser-api/internal/schema"
+	"github.com/gin-gonic/gin"
+	"log"
+	"parser-api/config"
+	"parser-api/internal/handler"
 )
 
 func main() {
-	err := schema.WriteSQLToFile("a", schema.Inserts("../1.pdf"))
+	cfg, err := config.LoadConfig("../config.yaml")
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to load config: %v", err)
 	}
-	//cfg, err := config.LoadConfig("../config.yaml")
-	//if err != nil {
-	//	log.Fatalf("Failed to load config: %v", err)
-	//}
-	//
-	//r := gin.Default()
-	//
-	//log.Printf("Server running on port " + cfg.Server.Port)
-	//r.Run(":" + cfg.Server.Port)
+
+	r := gin.Default()
+
+	r.POST("/postSQL", handler.PostSQLHandler)
+
+	log.Printf("Server running on port " + cfg.Server.Port)
+	r.Run(":" + cfg.Server.Port)
 }
