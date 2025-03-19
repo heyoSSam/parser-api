@@ -125,6 +125,8 @@ func CreateMultiSheetCSV(text string, outputPath string) error {
 	}
 	defer file.Close()
 
+	file.WriteString("\xEF\xBB\xBF")
+
 	writer := csv.NewWriter(file)
 	writer.Comma = ';'
 	defer writer.Flush()
