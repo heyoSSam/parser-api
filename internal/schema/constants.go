@@ -69,19 +69,4 @@ var Skeleton = `
 		actual_date DATE,
 		previous_date DATE
 	);
-	
-	CREATE TABLE IF NOT EXISTS sub_clauses (
-		sub_clause_number SERIAL PRIMARY KEY,
-		code_id INTEGER REFERENCES codes(code_id) ON DELETE CASCADE,
-		part_id INTEGER REFERENCES part(part_id) ON DELETE CASCADE,
-		section_number INTEGER REFERENCES sections(section_number) ON DELETE CASCADE,
-		paragraph_id INTEGER REFERENCES paragraphs(paragraph_id) ON DELETE CASCADE,
-		article_number INTEGER REFERENCES articles(article_number) ON DELETE CASCADE,
-		clause_number INTEGER REFERENCES clauses(clause_number) ON DELETE CASCADE,
-		sub_clause VARCHAR(255),
-		version INTEGER,
-		status BOOLEAN,
-		actual_date DATE,
-		previous_date DATE
-	);
 `

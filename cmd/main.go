@@ -5,7 +5,10 @@ import (
 )
 
 func main() {
-	schema.Inserts()
+	err := schema.WriteSQLToFile("a", schema.Inserts("../1.pdf"))
+	if err != nil {
+		panic(err)
+	}
 	//cfg, err := config.LoadConfig("../config.yaml")
 	//if err != nil {
 	//	log.Fatalf("Failed to load config: %v", err)
