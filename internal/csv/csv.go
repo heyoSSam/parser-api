@@ -16,7 +16,7 @@ type DocumentElement struct {
 	Title string
 }
 
-func CreateCSVDump(text string, outputPath string) error {
+func CreateCSVDump(docno string, text string, outputPath string) error {
 	re := regexp2.MustCompile(`\s+`, 0)
 	text, _ = re.Replace(text, " ", -1, -1)
 
@@ -36,6 +36,11 @@ func CreateCSVDump(text string, outputPath string) error {
 
 	if err := writer.Write([]string{"Тип", "Номер", "Название"}); err != nil {
 		return fmt.Errorf("ошибка записи заголовков: %w", err)
+	}
+
+	codeTitle := processing.IdToTitle[docno]
+	if err := writer.Write([]string{"Кодекс", docno, codeTitle}); err != nil {
+		return fmt.Errorf("ошибка записи названия кодекса: %w", err)
 	}
 
 	elements := parseDocumentElements(sentences)
