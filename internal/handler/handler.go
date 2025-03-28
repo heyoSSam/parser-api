@@ -1,13 +1,14 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
+	"parser-api/internal/csv"
 	"parser-api/internal/processing"
-	"parser-api/internal/reader"
 	"parser-api/internal/schema"
+
+	"github.com/gin-gonic/gin"
 )
 
 type RequestBody struct {
@@ -40,38 +41,34 @@ func PostSQLHandler(c *gin.Context) {
 }
 
 func PostCSVHandler(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		log.Printf("Failed to get form file: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file"})
+	var req RequestBody
+	if err := c.BindJSON(&req); err != nil {
+		log.Println("Ошибка парсинга JSON запроса:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
-	filePath := "./" + file.Filename
-	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+	if req.Docno == "" {
+		log.Println("Отсутствует docno в запросе")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing docno"})
 		return
 	}
 
-	text, err := reader.ReadPDF(filePath)
+	text, err := processing.GetDocumentText(req.Docno)
 	if err != nil {
-		log.Printf("Failed to read PDF: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read PDF"})
+		log.Println("Ошибка получения текста документа:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch document text"})
 		return
 	}
 
 	csvFilePath := "./output.csv"
-	err = processing.CreateMultiSheetCSV(text, csvFilePath)
+	err = csv.CreateCSVDump(text, csvFilePath)
 	if err != nil {
-		log.Printf("Failed to generate CSV: %v", err)
+		log.Printf("Ошибка генерации CSV: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSV"})
 		return
 	}
 
 	c.FileAttachment(csvFilePath, "output.csv")
-
-	defer func() {
-		_ = os.Remove(filePath)
-		_ = os.Remove(csvFilePath)
-	}()
+	defer os.Remove(csvFilePath)
 }

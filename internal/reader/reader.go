@@ -2,6 +2,7 @@ package reader
 
 import (
 	"bytes"
+
 	"github.com/ledongthuc/pdf"
 )
 
