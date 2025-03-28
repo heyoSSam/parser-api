@@ -1,6 +1,9 @@
 package processing
 
 import (
+	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"unicode"
 )
@@ -32,4 +35,25 @@ func SplitSentences(text string) []string {
 	}
 
 	return sentences
+}
+
+func GetDocumentText(docno string) (string, error) {
+	url := fmt.Sprintf("http://91.243.71.94/api/document/details?docno=%s", docno)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", fmt.Errorf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("API returned status: %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	return string(body), nil
 }

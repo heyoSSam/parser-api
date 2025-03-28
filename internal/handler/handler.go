@@ -1,43 +1,42 @@
 package handler
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"os"
 	"parser-api/internal/processing"
 	"parser-api/internal/reader"
 	"parser-api/internal/schema"
-
-	"github.com/gin-gonic/gin"
 )
 
+type RequestBody struct {
+	Docno string `json:"docno"`
+}
+
 func PostSQLHandler(c *gin.Context) {
-	file, err := c.FormFile("file")
-	if err != nil {
-		log.Printf("Failed to get form file: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file"})
+	var req RequestBody
+	if err := c.BindJSON(&req); err != nil {
+		log.Println("Failed to parse JSON request:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 
-	filePath := "./" + file.Filename
-	if err := c.SaveUploadedFile(file, filePath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+	if req.Docno == "" {
+		log.Println("Missing docno in request")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing docno"})
 		return
 	}
 
 	sqlFilePath := "./output.sql"
-	err = schema.WriteSQLToFile(sqlFilePath, schema.Inserts(filePath))
+	err := schema.WriteSQLToFile(sqlFilePath, schema.Inserts(req.Docno))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate SQL"})
 		return
 	}
 
 	c.FileAttachment(sqlFilePath, "output.sql")
-
-	defer func() {
-		_ = os.Remove(filePath)
-		_ = os.Remove(sqlFilePath)
-	}()
+	defer os.Remove(sqlFilePath)
 }
 
 func PostCSVHandler(c *gin.Context) {

@@ -5,16 +5,16 @@ import (
 	"github.com/dlclark/regexp2"
 	"os"
 	"parser-api/internal/processing"
-	"parser-api/internal/reader"
 	"strconv"
 	"strings"
 )
 
-func Inserts(path string) []string {
-	text, err := reader.ReadPDF(path)
+func Inserts(docno string) []string {
+	text, err := processing.GetDocumentText(docno)
 	if err != nil {
 		panic(err)
 	}
+
 	var sqlStatements []string
 
 	re := regexp2.MustCompile(`\s+`, 0)
@@ -26,16 +26,21 @@ func Inserts(path string) []string {
 	clauseCount := 0
 	codeStatus := false
 
+	codeTitle := processing.IdToTitle[docno]
+	sql := fmt.Sprintf(`UPDATE codes SET code = '%s', actual_date = NOW() WHERE code_id = 1;`, codeTitle)
+	sqlStatements = append(sqlStatements, sql)
+
 	for _, line := range sentences {
 		line = strings.TrimSpace(line)
 
-		if m, _ := processing.CodeRegex.FindStringMatch(line); m != nil && !codeStatus {
-			codeTitle := m.String()
-			sql := fmt.Sprintf(`UPDATE codes SET code = '%s', actual_date = NOW() WHERE code_id = 1;`, codeTitle)
-			sqlStatements = append(sqlStatements, sql)
-			codeID = 1
-			codeStatus = true
-		} else if m, _ := processing.PartRegex.FindStringMatch(line); m != nil {
+		//if m, _ := processing.CodeRegex.FindStringMatch(line); m != nil && !codeStatus {
+		//	codeTitle := processing.IdToTitle[docno]
+		//	sql := fmt.Sprintf(`UPDATE codes SET code = '%s', actual_date = NOW() WHERE code_id = 1;`, codeTitle)
+		//	sqlStatements = append(sqlStatements, sql)
+		//	codeID = 1
+		//	codeStatus = true
+		//}
+		if m, _ := processing.PartRegex.FindStringMatch(line); m != nil {
 			partNum, _ := strconv.Atoi(m.GroupByNumber(1).String())
 			partTitle := m.GroupByNumber(2).String()
 			partID = partNum
@@ -67,7 +72,7 @@ func Inserts(path string) []string {
 			sql := fmt.Sprintf(`INSERT INTO clauses (clause_id, clause_number, code_id, part_id, section_number, paragraph_id, article_number, clause, version, status, actual_date, previous_date) VALUES (%d, %d, %d, %d, %d, %d, %d, '%s', 1, TRUE, NOW(), NULL);`, clauseCount, clauseID, codeID, partID, sectionID, paragraphID, articleID, clauseTitle)
 			sqlStatements = append(sqlStatements, sql)
 		} else if m, _ := processing.KAZCodeRegex.FindStringMatch(line); m != nil && !codeStatus {
-			codeTitle := m.String()
+			codeTitle := processing.IdToTitle[docno]
 			sql := fmt.Sprintf(`UPDATE codes SET code = '%s', actual_date = NOW() WHERE code_id = 1;`, codeTitle)
 			sqlStatements = append(sqlStatements, sql)
 			codeID = 1
@@ -105,9 +110,6 @@ func Inserts(path string) []string {
 			sqlStatements = append(sqlStatements, sql)
 		}
 	}
-
-	fmt.Println(sqlStatements)
-
 	return sqlStatements
 }
 
