@@ -62,7 +62,7 @@ func PostCSVHandler(c *gin.Context) {
 	}
 
 	csvFilePath := "./output.csv"
-	err = csv.CreateCSVDump(text, csvFilePath)
+	err = csv.CreateCSVDump(req.Docno, text, csvFilePath)
 	if err != nil {
 		log.Printf("Ошибка генерации CSV: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate CSV"})
